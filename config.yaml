@@ -1,0 +1,12 @@
+default:
+    host: ""
+    username: ""
+    password: ""
+
+local:
+    host: "127.0.0.1"
+    port: "27017"
+    drop_key: "k2ak2kwfebkcky7"
+    drop_secret: "o60hvmf62kvho7k"
+
+

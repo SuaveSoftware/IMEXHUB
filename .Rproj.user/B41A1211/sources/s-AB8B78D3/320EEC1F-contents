@@ -1,0 +1,145 @@
+all_tests <- all_tests %>% append(list(  #if all tests pass export type=group
+    'PAYPAL|PAYPALCSV' = c('filename_test|DOWNLOAD','columnnumber_test|41')
+))
+
+all_preprocessing <- all_preprocessing %>% append(list(
+    PAYPAL = list(
+        PAYPALCSV = c('get_csv_data|HDRTRUE'),
+        PAYPALAPI = c('get_paypal_api_data')
+    )
+))
+
+all_export_rules <- all_export_rules %>% append(list(
+    PAYPAL = c('optional_input_types|PAYPALCSV.PAYPALAPI')  #,'maximum_import_type_count|1','unique_import_type_count|1'
+    
+))
+
+all_export_options <- all_export_options %>% append(list(
+    PAYPAL = c('FILE')
+))
+
+all_export_processing <- all_export_processing %>% append(list(
+    PAYPAL = list(
+        FILE = c('paypal_export_processing_file'),
+        QBO = c('paypal_export_processing_qbo')
+    )
+))
+
+paypal_export_processing_qbo <- function(selected_imports,param) {
+    # more <- list(...)
+    # access_token <- more$access_token
+    
+    PAYPALCSV <- tibble()
+    selected_imports %>% map(function(x) {
+        if (x$import_type=="PAYPALCSV") PAYPALCSV <<- PAYPALCSV %>% rbind(
+            sqlite_read_data(x$import_id)
+        )
+    })
+    
+    PAYPALAPI <- tibble()
+    selected_imports %>% map(function(x) {
+        if (x$import_type=="PAYPALAPI") PAYPALAPI <<- PAYPALAPI %>% rbind(
+            sqlite_read_data(x$import_id)
+        )
+    })
+    
+    
+    
+    
+    datas <- httr::GET(url_query,
+                       accept_json(),
+                       add_headers('Authorization'= paste0("Bearer ", access_token))
+    )
+    j_son <- fromJSON(content(datas, as = "text"))
+    write_rds(j_son$QueryResponse$Customer %>% as_tibble(),"MASTER_Customer.rds")
+    #MASTER <- read_rds("MASTER.rds")
+    
+    #https://developer.intuit.com/app/developer/qbo/docs/develop/explore-the-quickbooks-online-api/data-queries
+    #https://developer.intuit.com/app/developer/qbo/docs/api/accounting/all-entities
+    #Transfer,SalesReceipt,Bill
+    
+    
+    
+    
+
+    MASTER <- list(
+        PAYPALCSV = tibble(PAYPALCSV),
+        PAYPALAPI = tibble(PAYPALAPI)
+    )
+    saveRDS(object = MASTER,file = "../MASTER.rds")
+    #new_rds_object <- readRDS(file = "../MASTER.rds")
+    
+}
+
+paypal_export_processing_file <- function(selected_imports,param) {
+    PAYPALCSV <- tibble()
+    selected_imports %>% map(function(x) {
+        if (x$import_type=="PAYPALCSV") PAYPALCSV <<- PAYPALCSV %>% rbind(
+            sqlite_read_data(x$import_id)
+        )
+    })
+
+    PAYPALAPI <- tibble()
+    selected_imports %>% map(function(x) {
+        if (x$import_type=="PAYPALAPI") PAYPALAPI <<- PAYPALAPI %>% rbind(
+            sqlite_read_data(x$import_id)
+        )
+    })
+    
+    #paypal_dat <- new_rds_object
+    paypal_dat <- PAYPALAPI
+    paypal_dat %>% dplyr::rename(
+        "Date"="transaction_initiation_date",
+        "Name"="payer_name.alternate_full_name",
+        "Type"="transaction_event_code",
+        "Status"="transaction_status",
+        "Currency"="transaction_amount.currency_code",
+        "Gross"="transaction_amount.value",
+        "Fee"="fee_amount.value",
+        #"Net",
+        "From.Email.Address"="email_address",
+        #"To.Email.Address",
+        "Transaction.ID"="transaction_id",
+        #"Shipping.Address",
+        "VAT"="tax_amount.value",
+        "Custom.Number"="custom_field",
+        "Quantity"="item_quantity",
+        #"Balance",
+        "Town.City"="address...26.city",
+        "County"="address...26.state",
+        "Postcode"="address...26.postal_code",
+        "Country"="address...26.country_code",
+        "Subject"="item_description",
+        #"Country.Code",
+        #"Balance.Impact"
+    )
+    
+    
+    
+    
+    #aim:
+    # paypal_dat <- paypal_dat %>%
+    #     dplyr::rename("Date" = paypal_dat%>%names()%>%pluck(1)) %>%
+    #     select("Date","Name","Type","Status","Currency","Gross","Fee","Net","From.Email.Address","To.Email.Address","Transaction.ID","Shipping.Address","VAT","Custom.Number","Quantity","Balance","Town.City","County","Postcode","Country","Subject","Country.Code","Balance.Impact")
+    
+    
+    
+    
+    
+    
+    MASTER <- list(
+        PAYPALCSV = tibble(PAYPALCSV),
+        PAYPALAPI = tibble(PAYPALAPI)
+    )
+    saveRDS(object = MASTER,file = "../MASTER_paypal.rds")
+    #new_rds_object <- readRDS(file = "../MASTER_paypal.rds")
+    
+    #PAYPALCSV
+    
+    wb <- createWorkbook()
+    addWorksheet(wb, "R_gladage")
+    writeDataTable(wb,1,PAYPALAPI,colNames = TRUE,tableStyle = "none",withFilter = TRUE,headerStyle = NULL)
+    saveWorkbook(wb, "export_temp/paypalcsv.xlsx", overwrite = TRUE)
+    list(filepath="export_temp/paypalcsv.xlsx")
+}
+

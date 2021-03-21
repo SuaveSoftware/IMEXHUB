@@ -14,7 +14,6 @@ library(shinyFiles)
 library(shinyjs)
 library(DT)
 
-# DB
 library(mongolite) # Resource: https://jeroen.github.io/mongolite/
 library(jsonlite)
 
@@ -151,6 +150,8 @@ server <- function(input, output, session) {
     #setup
     reactive_values <- reactiveValues(ui_data = NULL)  #,file_path = NULL,dev = NULL,dir_selected = NULL
     notification_id <- NULL
+    #check /db_files and /export_temp exist, if not create!!!
+    
 
     #get user_info (user_id,last import method,last folder,last selected tab,auto export,auto overwrite same import_type)!!!
     #get import_type and export_type settings, to change from default (eg VAT settings for QB export)!!!

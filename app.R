@@ -4,7 +4,6 @@
 ### Contact david.elms@statementreader.com  ###
 ###############################################
 
-
 # LIBRARIES ----
 # Shiny
 library(shiny)
@@ -14,6 +13,7 @@ library(shinyFiles)
 library(shinyjs)
 library(DT)
 
+# DB
 library(mongolite) # Resource: https://jeroen.github.io/mongolite/
 library(jsonlite)
 

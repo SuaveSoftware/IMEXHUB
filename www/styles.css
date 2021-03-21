@@ -1,0 +1,58 @@
+
+/*notifications
+#shiny-notification-panel {
+  position: fixed;
+  top: 0 !important;
+  left: calc(50%) !important;
+  background-color: rgba(0,0,0,0);
+  padding: 2px;
+  width: 250px;
+  z-index: 99999;
+}*/
+
+/*div#shiny-notification-my_notification {
+  background-color: rgba(50,50,50,0) !important;
+}*/
+
+/*#shiny-notification-panel {
+             position:fixed;
+             top: calc(50%);
+             left: calc(50%);
+             }
+.shiny-notification {
+             position:fixed;
+             top: calc(50%);
+             left: calc(50%);
+             }
+#shiny-notification-panel {
+  top: 0 !important;
+  left: calc(50%) !important;
+}
+.shiny-notification {
+  background-color: rgba(50,50,50,0) !important;
+}
+*/
+
+
+/*PANELS*/
+
+/*.selected {
+ font-size: 10px;
+ background-color: inherit !important;
+}*/
+
+/*table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover { 
+    -webkit-filter: invert(100%);
+    filter: invert(100%);
+}*/
+
+table.dataTable tbody tr.selected {
+    -webkit-filter: grayscale(90%);
+    filter: grayscale(90%);
+}
+
+.navbar-nav {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+

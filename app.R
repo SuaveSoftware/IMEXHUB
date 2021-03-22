@@ -19,9 +19,9 @@ library(jsonlite)
 
 library(config)
 
+library(plyr) #rbind.fill
 library(tidyverse)
 library(lubridate)
-library(plyr) #rbind.fill
 library(readxl)
 library(openxlsx)  #for write
 
@@ -40,7 +40,7 @@ options(shiny.maxRequestSize = 80*1024^2)
 theme <- "paper"
 button_theme_search <- "primary"
 Sys.setenv(R_CONFIG_ACTIVE = "production")  # use "default"/"local" for prototyping, "production" for production
-config <- config::get(file = "../config.yaml")
+config <- config::get(file = "config.yaml")
 source(file = "02_db_scripts.R")
 source(file = "03_file_scripts_general.R")
 source(file = "08_gladage_export.R")

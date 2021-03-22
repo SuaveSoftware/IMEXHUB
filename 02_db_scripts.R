@@ -1,8 +1,8 @@
 mongo_connect <- function(collection, database, config) {
-    host = config$host
-    port = config$port
-    username = config$username
-    password = config$password
+    host <- config$host
+    port <- config$port
+    username <- config$username
+    password <- config$password
     
     if (host %>% str_detect('127.0.0.1')) {  #local
         mongo(

@@ -1,8 +1,9 @@
-mongo_connect <- function(collection, database, config) {
-    host <- config$host
-    port <- config$port
-    username <- config$username
-    password <- config$password
+config <- config::get(file = "config.yaml")
+mongo_connect <- function(collection, database,
+             host = config$host,
+             port = config$port,
+             username = config$username,
+             password = config$password) {
     
     if (host %>% str_detect('127.0.0.1')) {  #local
         mongo(
@@ -21,7 +22,7 @@ sqlite_connect <- function(db_name) {
 }
 
 mongo_read_ui_data <- function() {
-    mongo_connection <- mongo_connect(collection = "myfirstcollection", database = "myfirstdb", config)
+    mongo_connection <- mongo_connect(collection = "myfirstcollection", database = "myfirstdb")
     
     it <- mongo_connection$iterate(query = str_c('{}'))
     mydata <<- list()  #list(import_type=tibble)

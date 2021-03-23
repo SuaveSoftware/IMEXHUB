@@ -5,7 +5,7 @@ mongo_connect <- function(collection, database,
              username = config$username,
              password = config$password) {
     
-    if (host %>% str_detect('127.0.0.1')) {  #local
+    if (port != "") {  #local
         mongo(
             collection = collection,
             url = str_glue("mongodb://{host}:{port}/{database}")

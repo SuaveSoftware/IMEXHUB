@@ -27,7 +27,7 @@ sqlite_connect <- function(db_name) {
 }
 
 mongo_read_ui_data <- function() {
-    mongo_connection <- mongo_connect(collection = "myfirstcollection", database = "myfirstdb")
+    mongo_connection <- mongo_connect(collection = "imexhub_collection", database = "imexhub_database")
     
     it <- mongo_connection$iterate(query = str_c('{}'))
     mydata <<- list()  #list(import_type=tibble)
@@ -66,7 +66,7 @@ mongo_read_ui_data <- function() {
 
 #data
 mongo_update_and_write <- function(mydata,import_group="NULL",import_basename="NULL",import_size="NULL",import_mtime="NULL",import_datetime="",exported=0) {
-    mongo_connection <- mongo_connect(collection = "myfirstcollection", database = "myfirstdb")
+    mongo_connection <- mongo_connect(collection = "imexhub_collection", database = "imexhub_database")
 
     mydata$data <- mydata$data %>% cbind(list(selected_ui=1))  #ui loads with checkboxes selected, always exists
     myimport_type=strsplit(import_group,"\\|")[[1]][2]
@@ -110,7 +110,7 @@ sqlite_update_and_write <- function(my_import_id,mydata) {
 }
 
 mongo_delete <- function(import_id) {
-    mongo_connection <- mongo_connect(collection = "myfirstcollection", database = "myfirstdb")
+    mongo_connection <- mongo_connect(collection = "imexhub_collection", database = "imexhub_database")
 
     #delete using mongo_connection
     mongo_connection$remove(query = str_c('{ "import_id":"',import_id,'" }'),just_one = TRUE)
@@ -124,7 +124,7 @@ sqlite_delete <- function(my_import_id) {
 
 # #EXPORT: check types seleted -> match export rules -> read from db -> process -> save
 # mongo_get_selected_ui <- function(param=1) {
-#     mongo_connection <- mongo_connect(collection = "myfirstcollection", database = "myfirstdb")
+#     mongo_connection <- mongo_connect(collection = "imexhub_collection", database = "imexhub_database")
 # 
 #     it <- mongo_connection$iterate(query = str_c('{"selected_ui":',param,'}'))
 #     selected_imports <- list()
@@ -156,7 +156,7 @@ sqlite_read_data <- function(my_import_id) {
     data_tbl
 }
 # mongo_update_exported <- function(selected_imports) {
-#     mongo_connection <- mongo_connect(collection = "myfirstcollection", database = "myfirstdb")
+#     mongo_connection <- mongo_connect(collection = "imexhub_collection", database = "imexhub_database")
 #     
 #     selected_imports %>%
 #         map(function(x) {

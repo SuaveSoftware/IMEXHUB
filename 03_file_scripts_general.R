@@ -1,7 +1,7 @@
 #pre-open file checks [generic] ----
 #rule#1: new name,size,mtime
 new_file_check <- function(name,size) {
-    mongo_connection <- mongo_connect(collection = "myfirstcollection", database = "myfirstdb")
+    mongo_connection <- mongo_connect(collection = "imexhub_collection", database = "imexhub_database")
     
     query <- str_c('{ "import_basename" : "',name,'" , "import_size" : ',size,' }')
     test <- mongo_connection$distinct( key = "import_id" , query = query ) %>% length()==0  #pass

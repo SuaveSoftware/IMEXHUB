@@ -185,7 +185,7 @@ server <- function(input, output, session) {
             # volumes <- list(columns=str_replace(file_selected$datapath,file_selected$name,""))
             # print(volumes)
 
-            #pre open file checks, rule 1: is file already in myfirstcollection?
+            #pre open file checks, rule 1: is file already in imexhub_collection?
             new_file_check_output <- data.frame(row.names = NULL,file_selected, new_file_check_output=file_selected %>% split(x = .,f = file_selected$name) %>% sapply(function(x) {new_file_check(x$name,x$size)}) )  #%>% matrix(ncol = 5)
             # new_file_check_output <- reactive_values$file_path %>% lapply(function(x) {new_file_check(x)}) %>% cbind(reactive_values$file_path,.) %>% matrix(ncol = 2)
             skipped_files <- new_file_check_output[,1][new_file_check_output[,5]==FALSE] %>% matrix(ncol = 1)

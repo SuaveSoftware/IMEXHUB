@@ -1,2 +1,2 @@
 # GLADAGE
-- Automating data import and export for multiple input types.
+- Automating data import and export for multiple input sources.

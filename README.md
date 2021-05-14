@@ -63,6 +63,6 @@ We're looking for help with the following points:
     - SEO analysis for feature list and homepage optimisation
 
 # GET IN TOUCH
-We would love your feedback, email us at david@statementreader.com
+We would love to hear your feedback, email us at david@statementreader.com or connect here: https://www.linkedin.com/in/delms/
 
 

@@ -62,6 +62,7 @@ We're looking for help with the following points:
     - Display whether import is already exported in overview table
     - SEO analysis for feature list and homepage optimisation
 
-
+# GET IN TOUCH
+We would love your feedback, email us at david@statementreader.com
 
 

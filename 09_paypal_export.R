@@ -32,40 +32,6 @@ paypal_export_processing_file <- function(selected_imports,param) {
         )
     })
 
-    #API input manipulation:
-    # PAYPALAPI <- tibble()
-    # selected_imports %>% map(function(x) {
-    #     if (x$import_type=="PAYPALAPI") PAYPALAPI <<- PAYPALAPI %>% rbind(
-    #         sqlite_read_data(x$import_id)
-    #     )
-    # })
-    # paypal_dat <- PAYPALAPI
-    # paypal_dat %>% dplyr::rename(
-    #     "Date"="transaction_initiation_date",
-    #     "Name"="payer_name.alternate_full_name",
-    #     "Type"="transaction_event_code",
-    #     "Status"="transaction_status",
-    #     "Currency"="transaction_amount.currency_code",
-    #     "Gross"="transaction_amount.value",
-    #     "Fee"="fee_amount.value",
-    #     #"Net",
-    #     "From.Email.Address"="email_address",
-    #     #"To.Email.Address",
-    #     "Transaction.ID"="transaction_id",
-    #     #"Shipping.Address",
-    #     "VAT"="tax_amount.value",
-    #     "Custom.Number"="custom_field",
-    #     "Quantity"="item_quantity",
-    #     #"Balance",
-    #     "Town.City"="address...26.city",
-    #     "County"="address...26.state",
-    #     "Postcode"="address...26.postal_code",
-    #     "Country"="address...26.country_code",
-    #     "Subject"="item_description",
-    #     #"Country.Code",
-    #     #"Balance.Impact"
-    # )    
-    
     #rename/select
     paypal_dat <- PAYPALCSV %>%
         dplyr::rename("Date" = PAYPALCSV%>%names()%>%pluck(1)) %>%

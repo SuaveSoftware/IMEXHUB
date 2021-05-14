@@ -104,6 +104,7 @@ gladage_export_processing <- function(selected_imports,param) {
     #MANIPULATE DATA
     #INVSUM.csv - add cfm_number by matching invsum_dat.col_5 to cstlist_dat.col_name OR use invsum_dat.col_4 to cstlist_dat.col_1
     #join on sage code
+    cstlist_dat <- cstlist_dat %>% mutate( col_1 = col_1 %>% as.character() )
     invsum_cstlist <- right_join( invsum_dat , cstlist_dat[,c('col_1','cfm_name','cfm_number1','cfm_number2','cfm_number3')] , by = c("col_4" = "col_1") )
     
     #CSTIVDUEDATE.csv - add cfm_number by matching cstivduedate_dat.col_2 to cstlist_dat.col_name OR use cstivduedate_dat.col_1 to cstlist_dat.col_1, and unique_flag (first row from col_8 only)
@@ -134,6 +135,8 @@ gladage_export_processing <- function(selected_imports,param) {
     member_dat <- member_dat %>% mutate( 'Inactive_Date' = as.POSIXct(Inactive_Date, origin="1970-01-01") %>% as.Date() )
     member_dat <- member_dat %>% mutate( 'Last_Spot_Check_Date' = as.POSIXct(Last_Spot_Check_Date, origin="1970-01-01") %>% as.Date() )
     
+    #remove defra
+    dispatch_dat <- dispatch_dat %>% filter(str_detect(Supplier,"DEFRA - Covid 19 Response",negate = TRUE) & str_detect(Supplier,"DEFRA - Covid 19 Response Phase 2",negate = TRUE))
     
     #dev
     # temp1 <- cstlist_dat %>% select(col_3,cfm_number1,cfm_number2,cfm_number3)
@@ -240,10 +243,10 @@ gladage_export_processing <- function(selected_imports,param) {
         arrange(desc(count_cfm_number1))  #dev
     #>kg rec'd in last cal'r mth
     som <- function(x,p) {
-        #if (p=="last") return ((as.Date(format(x, "%Y-%m-01"))-1) %>% format(., "%Y-%m-21") %>% as.Date())  #21st of previous month
-        #if (p=="this") return (as.Date(format(x, "%Y-%m-20")))  #20th of current month
-        if (p=="last") return (as.Date(format(x, "2021-02-01")))  #for nov2020 report only
-        if (p=="this") return (as.Date(format(x, "2021-02-28")))  #for nov2020 report only
+        if (p=="last") return ((as.Date(format(x, "%Y-%m-01"))-1) %>% format(., "%Y-%m-01") %>% as.Date())  #1st of previous month
+        if (p=="this") return ((as.Date(format(x, "%Y-%m-01"))-1) %>% as.Date())  #end of previous month
+        # if (p=="last") return (as.Date(format(x, "2021-04-01")))  #hardcoded date
+        # if (p=="this") return (as.Date(format(x, "2021-04-30")))  #hardcoded date
     }
     kg_recd_in_last_calr_mth <- dispatch_dat_sample %>%
         mutate(

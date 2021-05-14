@@ -50,17 +50,17 @@ We're looking for help with the following points:
 - User tutorials
 
 - Critique, prioritise and add new features/product refinements:
-    Email (input)
-    PDF QR code (input)
-    Duplicate transactions (process)
-    PDF text parser (input)
-    Schedule imports
-    Schedule exports
-    Renderui to reset fileInput on import file
-    Document history log
-    User settings window
-    Display whether import is already exported in overview table
-    SEO analysis for feature list and homepage optimisation
+    - Email (input)
+    - PDF QR code (input)
+    - Duplicate transactions (process)
+    - PDF text parser (input)
+    - Schedule imports
+    - Schedule exports
+    - Renderui to reset fileInput on import file
+    - Document history log
+    - User settings window
+    - Display whether import is already exported in overview table
+    - SEO analysis for feature list and homepage optimisation
 
 
 

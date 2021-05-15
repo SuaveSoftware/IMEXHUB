@@ -6,33 +6,30 @@
 
 
 # LIBRARIES ----
-# Shiny
 library(shiny)
 library(shinyWidgets)
 library(shinythemes)
 library(shinyFiles)
 library(shinyjs)
-library(DT)
-
-library(mongolite) # Resource: https://jeroen.github.io/mongolite/
-library(jsonlite)
 
 library(config)
 
-library(plyr) #rbind.fill
 library(tidyverse)
 library(lubridate)
 library(readxl)
 library(openxlsx)  #for write
+library(DT)
 
-library(rdrop2)  #https://github.com/karthik/rdrop2
-
-library(httr)
-library(httpuv)
-library(curl)
+library(mongolite) # Resource: https://jeroen.github.io/mongolite/
 library(jsonlite)
-library(base64enc)
 library(RSQLite)
+
+# library(httr)
+# library(httpuv)
+# library(curl)
+# library(base64enc)
+# library(rdrop2)  #https://github.com/karthik/rdrop2
+# library(plyr) #rbind.fill
 
 
 #SETUP

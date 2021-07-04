@@ -112,7 +112,7 @@ paypal_export_processing_file <- function(selected_imports,param) {
             ServiceDate = Date
         ) %>%
         select(SalesReceiptNo,Customer,Date,DepositAccount,Location,Memo,"Item(Product/Service)",ItemDescription,ItemQuantity,ItemRate,ItemAmount,ItemTaxCode,ItemTaxAmount,Currency,ServiceDate)
-    
+    #check not >1 customer with >1 currencies!!!
     
     #QB:bank - date.description,amount
     #rbind fees to original list, and split into list(currency=tibble())

@@ -10,6 +10,7 @@ new_file_check <- function(name,size) {
     test  #true/false
 }
 
+
 #get import_group ----
 all_tests <- list()
 #prepare pre-open identification of export type from first line ----
@@ -44,7 +45,6 @@ get_group <- function (path,name) {
     
     #send first line into tests and return vector for each file, check sum and length for group match
     group_status <- 1:length(all_tests) %>% map(function (group_number) {  #loops through groups
-        # all_tests[x] %>% call(first_line) %>% eval()
         sum(all_tests[[group_number]] %>% map(function(test_name_param){  #loops through tests
             test_name <- strsplit(test_name_param,split = "\\|")[[1]][1]
             param <- strsplit(test_name_param,split = "\\|")[[1]][2]
@@ -112,9 +112,6 @@ data_preprocessed <- function (path,group) {
     })
     
     list(data=data_tbl)
-    
-    #check selected_columns exist on all records!!!  (valuebox_columns,selected_columns)
-    
 }
 
 
@@ -185,9 +182,6 @@ get_export_options <- function(selected_imports) {
 
 #export processing ----
 all_export_processing <- list()
-#add to all_export_processing
-#add default export_type settings from user_base!!!
-#process and export here
 run_export_processing <- function(selected_imports,export_mode="FILE") {  #list(list(import_id=import_id,export_type=export_type,import_type=import_type),...)
     #get export_type
     export_type <- strsplit(selected_imports[[1]][["import_group"]],"\\|")[[1]][1]

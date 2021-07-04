@@ -28,6 +28,23 @@ We're excited that the first iteration of IMEXHUB is already helping two organis
     - FREE - Completely:) The closest comparison product costs £hundreds each year to process more than 100 transactions per month
 
 
+## WHAT'S NEXT?
+- Documentation for developers to contribute and for clients to implement the application
+- Cards, for separate input and export configurations
+- Sessions, for concurrent users
+- Email (input)
+- PDF QR code (input)
+- Duplicate transactions (process)
+- PDF text parser (input)
+- Schedule imports
+- Schedule exports
+- Renderui to reset fileInput on import file
+- Document history log
+- User settings window
+- Display whether import is already exported in overview table
+- SEO analysis for feature list and homepage optimisation
+
+
 ## GETTING STARTED (LOCAL IMPLEMENTATION)
 #### R and RStudio setup
 ```
@@ -58,22 +75,6 @@ local:
 ## GETTING STARTED (SERVER IMPLEMENTATION)
 [14/5 more coming soon]
 
-
-## WHAT'S NEXT?
-- Documentation for developers to contribute and for clients to implement the application
-- Cards, for separate input and export configurations
-- Sessions, for concurrent users
-- Email (input)
-- PDF QR code (input)
-- Duplicate transactions (process)
-- PDF text parser (input)
-- Schedule imports
-- Schedule exports
-- Renderui to reset fileInput on import file
-- Document history log
-- User settings window
-- Display whether import is already exported in overview table
-- SEO analysis for feature list and homepage optimisation
 
 ## GET IN TOUCH
 Email us at david@statementreader.com or connect here: https://www.linkedin.com/in/delms/

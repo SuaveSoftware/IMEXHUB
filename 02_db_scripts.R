@@ -1,4 +1,3 @@
-config <- config::get(file = "config.yaml")
 mongo_connect <- function(collection, database,
              host = config$host,
              port = config$port,
@@ -103,7 +102,6 @@ sqlite_update_and_write <- function(my_import_id,mydata) {
     my_db_name <- str_c("db_files/",my_import_id,".db")
     sqlite_connection <- sqlite_connect(my_db_name)
 
-    #add all data from sqlite db to new file
     RSQLite::dbWriteTable(sqlite_connection, my_import_id, mydata$data,overwrite=FALSE)
 
     dbDisconnect(sqlite_connection)
@@ -112,7 +110,6 @@ sqlite_update_and_write <- function(my_import_id,mydata) {
 mongo_delete <- function(import_id) {
     mongo_connection <- mongo_connect(collection = "imexhub_collection", database = "imexhub_database")
 
-    #delete using mongo_connection
     mongo_connection$remove(query = str_c('{ "import_id":"',import_id,'" }'),just_one = TRUE)
     mongo_connection$disconnect()
 }
@@ -122,53 +119,12 @@ sqlite_delete <- function(my_import_id) {
     file.remove(my_db_name)
 }
 
-# #EXPORT: check types seleted -> match export rules -> read from db -> process -> save
-# mongo_get_selected_ui <- function(param=1) {
-#     mongo_connection <- mongo_connect(collection = "imexhub_collection", database = "imexhub_database")
-# 
-#     it <- mongo_connection$iterate(query = str_c('{"selected_ui":',param,'}'))
-#     selected_imports <- list()
-#     while (!is.null(x <- it$one())) {
-#         paste(x$import_id)
-# 
-#         selected_imports <- selected_imports %>% append(
-#             list(list(
-#                 import_id = x$import_id,
-#                 export_type = x$export_type,
-#                 import_type = x$import_type
-#             ))
-#         )
-#     }
-# 
-#     mongo_connection$disconnect()
-#     selected_imports  #list(list(import_id=import_id,export_type=export_type,import_type=import_type),...)
-# }
 sqlite_read_data <- function(my_import_id) {
     my_db_name <- str_c("db_files/",my_import_id,".db")
-    # print("got here")
-    # # sqlite_connect(my_db_name)
-    sqlite_connection <- dbConnect(RSQLite::SQLite(), my_db_name)
-    
-    #get data_sql
+    sqlite_connection <- sqlite_connect(my_db_name)
+
     data_tbl <- DBI::dbReadTable(sqlite_connection, my_import_id)
 
     dbDisconnect(sqlite_connection)
     data_tbl
 }
-# mongo_update_exported <- function(selected_imports) {
-#     mongo_connection <- mongo_connect(collection = "imexhub_collection", database = "imexhub_database")
-#     
-#     selected_imports %>%
-#         map(function(x) {
-#             mongo_connection$update(
-#                 query = str_c('{"import_id":"',x$import_id,'"}'),
-#                 update = str_c('{"$set" : {"exported":1} }'),
-#                 upsert = TRUE)
-#         })
-#     
-#     mongo_connection$disconnect()
-# }
-# 
-# 
-# 
-# 

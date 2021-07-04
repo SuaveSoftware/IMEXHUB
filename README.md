@@ -28,41 +28,52 @@ We're excited that the first iteration of IMEXHUB is already helping two organis
     - FREE - Completely:) The closest comparison product costs £hundreds each year to process more than 100 transactions per month
 
 
-## HOW TO GET STARTED?
-- RSTUDIO (LOCAL) IMPLEMENTATION
-    - Requirements
-    - Installation
-    - [14/5 coming soon]
+## GETTING STARTED (LOCAL IMPLEMENTATION)
+#### R and RStudio setup
+```
+install.packages(c("shiny", "shinyWidgets", "shinythemes", "shinyFiles", "shinyjs", "config", "tidyverse", "lubridate", "readxl", "openxlsx", "DT", "mongolite", "jsonlite", "RSQLite", "cachem"))
+```
 
-- SERVER IMPLEMENTATION
-    - Requirements
-    - Installation
-    - [14/5 coming soon]
+#### MongoDB setup
+Create a collection called "imexhub_collection", and a database called "imexhub_database"
+
+#### Application setup
+Create config.yaml:
+```
+default:
+    host: ""
+    port: ""
+    username: ""
+    password: ""
+
+local:
+    host: "127.0.0.1"
+    port: "27017"
+    username: ""
+    password: ""
+```
+[15/5 more coming soon]
+
+
+## GETTING STARTED (SERVER IMPLEMENTATION)
+[14/5 more coming soon]
 
 
 ## WHAT'S NEXT?
-We're looking for help with the following points:
+    - Documentation for developers to contribute and for clients to implement the application
+- Cards, for separate input and export configurations
+- Sessions, for concurrent users
+- Email (input)
+- PDF QR code (input)
+- Duplicate transactions (process)
+- PDF text parser (input)
+- Schedule imports
+- Schedule exports
+- Renderui to reset fileInput on import file
+- Document history log
+- User settings window
+- Display whether import is already exported in overview table
+- SEO analysis for feature list and homepage optimisation
 
-- Add cards (which are separate input and export configurations) and sessions (for concurrent users), both on the UI and back-end
-
-- Create documentation for developers to contribute and for clients to implement the application
-
-- User tutorials
-
-- Critique, prioritise and add new features/product refinements:
-    - Email (input)
-    - PDF QR code (input)
-    - Duplicate transactions (process)
-    - PDF text parser (input)
-    - Schedule imports
-    - Schedule exports
-    - Renderui to reset fileInput on import file
-    - Document history log
-    - User settings window
-    - Display whether import is already exported in overview table
-    - SEO analysis for feature list and homepage optimisation
-
-# GET IN TOUCH
-We would love to hear your feedback, email us at david@statementreader.com or connect here: https://www.linkedin.com/in/delms/
-
-
+## GET IN TOUCH
+Email us at david@statementreader.com or connect here: https://www.linkedin.com/in/delms/

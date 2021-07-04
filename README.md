@@ -46,10 +46,6 @@ We're excited that the first iteration of IMEXHUB is already helping two organis
 
 
 ## GETTING STARTED FOR DEVELOPERS
-<details>
-<summary>
-    LOCAL AND SERVER IMPLEMENTATIONS (coming soon)
-</summary>
 ### LOCAL IMPLEMENTATION
 #### R and RStudio setup
 ```
@@ -77,9 +73,8 @@ local:
 [15/5 more coming soon]
 
 
-## GETTING STARTED (SERVER IMPLEMENTATION)
+### SERVER IMPLEMENTATION
 [14/5 more coming soon]
-</details>
 
 ## GET IN TOUCH
 Email us at david@statementreader.com or connect here: https://www.linkedin.com/in/delms/

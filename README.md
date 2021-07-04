@@ -60,7 +60,7 @@ local:
 
 
 ## WHAT'S NEXT?
-    - Documentation for developers to contribute and for clients to implement the application
+- Documentation for developers to contribute and for clients to implement the application
 - Cards, for separate input and export configurations
 - Sessions, for concurrent users
 - Email (input)

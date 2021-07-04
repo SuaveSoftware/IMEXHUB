@@ -1,10 +1,3 @@
-###############################################
-### Copyright Suave Software Limited 2020   ###
-### All rights reserved                     ###
-### Contact david.elms@statementreader.com  ###
-###############################################
-
-
 # LIBRARIES ----
 library(shiny)
 library(shinyWidgets)
@@ -24,20 +17,13 @@ library(mongolite) # Resource: https://jeroen.github.io/mongolite/
 library(jsonlite)
 library(RSQLite)
 
-# library(httr)
-# library(httpuv)
-# library(curl)
-# library(base64enc)
-# library(rdrop2)  #https://github.com/karthik/rdrop2
-# library(plyr) #rbind.fill
-
 
 #SETUP
 options(shiny.maxRequestSize = 80*1024^2)
 theme <- "paper"
 button_theme_search <- "primary"
-Sys.setenv(R_CONFIG_ACTIVE = "local")  # use "default"/"local" for prototyping, "production" for production
-config <- config::get(file = "config.yaml")
+Sys.setenv(R_CONFIG_ACTIVE = "local")
+config <<- config::get(file = "config.yaml")
 source(file = "02_db_scripts.R")
 source(file = "03_file_scripts_general.R")
 source(file = "08_gladage_export.R")
@@ -76,12 +62,12 @@ ui <- fluidPage(
 
     #1.0 HEAD ----
     tagList(
-        tags$head(HTML("<title>GLADAGE v2 - REMOVE DEFRA!!!</title>"))
+        tags$head(HTML("<title>IMEXHUB</title>"))
     ),
     style = "padding:0px;",
 
     
-    #2.0 NAVBAR 
+    #2.0 NAVBAR ----
     navbar <- shiny::navbarPage(
         #2.1 Application Title
         title = div(
@@ -97,9 +83,9 @@ ui <- fluidPage(
         theme = shinytheme(theme)
     ),
 
-    
-    #2.3.2 main panel output ----
-    mainPanel(width = 12,style="",class="container",  #padding:0px;halign:center;
+        
+    #2.1 Main panel output ----
+    mainPanel(width = 12,style="",class="container",
               div(class="row",style="margin:0px;",
                          #build my_import_export_card here...
                          div(class = "panel col-xs-12 col-sm-6 col-md-6 col-lg-4",style="margin: 0px;padding: 10px;border: 1px solid #D3D3D3;border-radius:0px;box-shadow:0 14px 18px rgba(0,0,0,0.3);",
@@ -109,7 +95,7 @@ ui <- fluidPage(
                                      actionLink(inputId = "GetDropbox",label="DropBox",class=str_glue("btn-block")),
                                      actionLink(inputId = "GetPayPal",label="PayPal",class=str_glue("btn-block")),
                                      actionLink(inputId = "button4",label="Bills API",class=str_glue("btn-block")),
-                                     circle = FALSE, status = "primary", #icon = icon("gear"),
+                                     circle = FALSE, status = "primary",
                                      tooltip = NULL,
                                      inline = TRUE,
                                      label = "IMPORT"
@@ -125,17 +111,9 @@ ui <- fluidPage(
                              ),
                          ),
                          
-                         # uiOutput(outputId = "temp_tabs"),
-                         
-                         # br(),
-                         # br(),
                   downloadButton(outputId = "export_button", "EXPORT",class = str_glue("btn-{button_theme_search}"),style = "visibility: hidden;height:0px;"),
                   
               )
-        #dev output
-        # verbatimTextOutput(outputId = "temp_text"),
-        # verbatimTextOutput(outputId = "temp_text2"),
-        # tableOutput(outputId = "temp_table1")
     )
 
     
@@ -144,26 +122,10 @@ ui <- fluidPage(
 # SERVER ----
 server <- function(input, output, session) {
     
-    #setup
-    reactive_values <- reactiveValues(ui_data = NULL)  #,file_path = NULL,dev = NULL,dir_selected = NULL
-    notification_id <- NULL
-    #check /db_files and /export_temp exist, if not create!!!
-    
-
-    #get user_info (user_id,last import method,last folder,last selected tab,auto export,auto overwrite same import_type)!!!
-    #get import_type and export_type settings, to change from default (eg VAT settings for QB export)!!!
-    #help/debug mode!!!
-    # reactive_values$user_base <- get_user_credentials(user="david")  #filtered tibble
-    reactive_values$folder_ignore_already_exported <- FALSE
-    # reactive_values$dir_selected <- "/Users/david/Documents/r_odi/input"  #default value for 'server folder input'
-
-    #check for user_base.rds, fill any missing list elements from user_base_default.rds!!!
-    
-    
-    
-    #load ui_data and fill tabs from db
+    #SETUP
+    reactive_values <- reactiveValues(ui_data = NULL, folder_ignore_already_exported = FALSE)
     reactive_values$ui_data <- mongo_read_ui_data()
-    # reactive_values$ui_data <- NULL
+    notification_id <- NULL
 
 
     #LOCAL FILE INPUT
@@ -174,31 +136,21 @@ server <- function(input, output, session) {
             reactive_values$file_path <- file_selected$datapath  #$name,size,type,datapath
             req(reactive_values$file_path %>% length() >0)
 
-            # write_rds(list(file_selected,reactive_values$file_path),"temp.rds")
-            # temp_lst <- readRDS(file = "temp.rds")
-
-            #DUPLICATED from here...
-            #save last folder to user_info
-            # volumes <- list(columns=str_replace(file_selected$datapath,file_selected$name,""))
-            # print(volumes)
-
             #pre open file checks, rule 1: is file already in imexhub_collection?
-            new_file_check_output <- data.frame(row.names = NULL,file_selected, new_file_check_output=file_selected %>% split(x = .,f = file_selected$name) %>% sapply(function(x) {new_file_check(x$name,x$size)}) )  #%>% matrix(ncol = 5)
-            # new_file_check_output <- reactive_values$file_path %>% lapply(function(x) {new_file_check(x)}) %>% cbind(reactive_values$file_path,.) %>% matrix(ncol = 2)
+            new_file_check_output <- file_selected %>% rowwise() %>% mutate( "new_file_check_output" = new_file_check(name,size) )
             skipped_files <- new_file_check_output[,1][new_file_check_output[,5]==FALSE] %>% matrix(ncol = 1)
             new_files_mat <- new_file_check_output[,1][new_file_check_output[,5]==TRUE] %>% matrix(ncol = 1)  #returns new files
             notification_id <<- sendnotification(msg = str_c("new_file_check_output:",new_files_mat, " skipped_files:",skipped_files,collapse = TRUE),
                                                  duration = 2,id = "my_notification1",session = session)
             addClass(id = "shiny-notification-panel", class = "customclass1")  #need to run once
             req(new_files_mat %>% nrow() >0)  #only need to proceed with new files
-            # isolate(reactive_values$file_path <- new_file_check_output)
             file_selected <- new_file_check_output[new_file_check_output$new_file_check_output==TRUE,]
             
-            #fill for archive check!!!
+            #fill for archive check, has file been exported before?!!!
             new_files_exported_mat <- data.frame(row.names = NULL,file_selected,new_files_exported_mat=1)
 
             #first line export_type identification
-            new_files_exported_importgroup_mat <- data.frame(row.names = NULL,new_files_exported_mat , new_files_exported_importgroup_mat=new_files_exported_mat %>% split(x = .,f = new_files_exported_mat$name) %>% sapply(function(x) {get_group(x$datapath,x$name)}) )  #%>% cbind(new_files_exported_mat,'import_group'=.)  #=import_group
+            new_files_exported_importgroup_mat <- new_files_exported_mat %>% rowwise() %>% mutate( "new_files_exported_importgroup_mat" = get_group(datapath,name) )
             notification_id <<- sendnotification(msg = str_c("import_group_output:",new_files_exported_importgroup_mat[,"new_files_exported_importgroup_mat"] %>% paste(.,collapse = ',')),
                                                  duration = 2,id = "my_notification3",session = session)
             req(sum(new_files_exported_importgroup_mat[,"new_files_exported_importgroup_mat"]=="") ==0)  #no null import_groups
@@ -214,14 +166,13 @@ server <- function(input, output, session) {
                 datapath <- new_files_exported_importgroup_mat[x,"datapath"] %>% unlist()
                 exported <- new_files_exported_importgroup_mat[x,"new_files_exported_mat"] %>% unlist()
                 import_group <- new_files_exported_importgroup_mat[x,"new_files_exported_importgroup_mat"] %>% unlist()
-                # print("got datapath: ",datapath)  #datapath,exported,import_group
 
                 #preprocessing
                 data <- data_preprocessed(datapath,import_group)  #list(data=data)
-                notification_id <<- sendnotification(msg = str_c("ran data_preprocessed: ",datapath),
+                notification_id <<- sendnotification(msg = str_c("ran data_preprocessed: ",datapath," - ",import_group),
                                                      duration = 2,id = str_c("my_notification",3+x),session = session)
 
-                #add to db (mydata,import_group,import_basename,import_size,import_mtime) +import_time!!!
+                #add to db (mydata,import_group,import_basename,import_size,import_mtime) +import_time
                 # import_mtime <- file.info(datapath)$mtime
                 my_import_id_list <- mongo_update_and_write(mydata = data,
                                                             import_group = import_group,
@@ -231,7 +182,7 @@ server <- function(input, output, session) {
                                                             import_datetime = import_datetime,
                                                             exported = exported)
                 my_import_id <- my_import_id_list$import_id
-                notification_id <<- sendnotification(msg = str_c("ran mongo_update_and_write: ",my_import_id),
+                notification_id <<- sendnotification(msg = str_c("ran mongo_update_and_write: ",my_import_id," - ",import_group),
                                                      duration = 2,id = str_c("my_notification",4+x),session = session)
 
                 #add all data to new sqlite file
@@ -268,13 +219,12 @@ server <- function(input, output, session) {
             )
         })
     })
-    
     output$file_datatable_ui <- renderUI({
         req(length(reactive_values$ui_data)>0)
         tagList(
             DT::dataTableOutput("overview"),
             shiny::actionButton(
-                inputId = "remove_tab_button",
+                inputId = "remove_imported_file",
                 label = NULL,
                 class = "btn-secondary btn-sm pull-right",
                 icon = icon("trash",class = "fa-lg",lib = "font-awesome"),
@@ -283,15 +233,12 @@ server <- function(input, output, session) {
     })
 
 
-    #export_button
+    # export_button tests and processing
     observeEvent(input$init, {
-        print("export_button")
         test1 <- FALSE
         test2 <- FALSE
         test3 <- FALSE
 
-        #mongo_get_selected_ui()
-        # selected_imports <- mongo_get_selected_ui() #list(list(import_id=import_id,export_type=export_type,import_type=import_type),...)
         selected_imports <- reactive_values$ui_data
         test1 <- selected_imports %>% length()>0
         notification_id <<- sendnotification(msg = str_c("selected_imports:",selected_imports %>% as.character(),"(",test1,")",collapse = TRUE),
@@ -316,7 +263,7 @@ server <- function(input, output, session) {
 
         #check options for export_type
         if (test3) {
-            my_export_options <- get_export_options(selected_imports)  #add user selection!!! For now priority:FILE,QBO
+            my_export_options <- get_export_options(selected_imports)
 
             if ("FILE" %in% my_export_options) {
                 shinyjs::runjs("document.getElementById('export_button').click();")  #expects file path
@@ -329,26 +276,25 @@ server <- function(input, output, session) {
         filename = function() {
             paste("my_download", ".xlsx", sep = "")
         },
-        content = function(file) {  #user modal window for specific processing options???
-            #run_export_processing()
-            # selected_imports <- mongo_get_selected_ui()
+        content = function(file) {
             selected_imports <- reactive_values$ui_data
-            my_output <- run_export_processing(selected_imports=selected_imports,export_mode="FILE")  #send user_settings??? get path
+            my_output <- run_export_processing(selected_imports=selected_imports,export_mode="FILE")
             file.copy(my_output$filepath,file,overwrite = TRUE)
-            #file.remove(my_output$filepath)
+            #file.remove(my_output$filepath)  #dev
 
             notification_id <<- sendnotification(msg = str_c("saveWorkbook!!! ",file),
                                                  duration = 5,id = "my_notification15",session = session)
         }
     )
     
-    #delete tab
-    observeEvent(input$remove_tab_button,{
+    
+    # delete imported files
+    observeEvent(input$remove_imported_file,{
         unselected_imports <- reactive_values$ui_data
         unselected_imports %>% map(function(x) {x$import_id} %>% mongo_delete(.))
         unselected_imports %>% map(function(x) {x$import_id} %>% sqlite_delete(.))
         
-        notification_id <<- sendnotification(msg = str_c("remove_tab_button:",unselected_imports %>% paste(.,collapse = '')),
+        notification_id <<- sendnotification(msg = str_c("remove_imported_file:",unselected_imports %>% paste(.,collapse = '')),
                                              duration = 2,id = "my_notification21",session = session)
         addClass(id = "shiny-notification-panel", class = "customclass1")
         mongo_read_ui_data()
@@ -361,44 +307,6 @@ server <- function(input, output, session) {
     
 
 
-    
-    #dev
-    #watch multiple datatables for selected rows, and send results to db on each click
-    # output$temp_text <- renderText({
-    #     c(
-    #         reactive_values$dev %>% length()," : ",selected_tab()
-    #         # selected_tab(),":",
-    #         # reactive_values$ui_data %>% jsonlite::toJSON() %>% jsonlite::prettify()
-    #     )
-    #     # reactive_values$ui_data %>% length()
-    #     
-    #     # # selected_datatable_id <- paste0(selected_tab(),"_cell_clicked")  #,"_cell_clicked"
-    #     # s <- input[["overview_cell_clicked"]]  #row,col,value
-    #     # s <- s[1] %>% unlist()
-    #     # import_id = reactive_values$ui_data[s] %>% unlist() %>% .[1]
-    #     # paste(s,import_id,reactive_values$file_path,sep = " - ")
-    # 
-    #     # if (is.null(reactive_values$data)) return(tibble(selected_tab=selected_tab(),cell_clicked=unlist(s)))
-    #     # reactive_values$data
-    #     })
-    # output$temp_text2 <- renderText({
-    #     paste(reactive_values$user_base$user)  #reactive_values$ui_data %>% length()
-    #     # paste(overview_stats_from_db$document_count)
-    # })
-    # output$temp_table1 <- renderTable({
-    #     reactive_values$dev
-    #     # input$SetDir
-    # })
-    # shinyjs::onclick(id = "button2_js", {
-    #     output$temp_text=renderTable({
-    #         tibble(empty=timestamp())
-    #     })
-    #     # delay(ms = 0, expr = {
-    #     #     click(id = "file1")
-    #     # })
-    #     
-    # })
-    
 }
 
 shinyApp(ui, server)

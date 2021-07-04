@@ -76,5 +76,6 @@ local:
 ### SERVER IMPLEMENTATION
 [14/5 more coming soon]
 
+
 ## GET IN TOUCH
 Email us at david@statementreader.com or connect here: https://www.linkedin.com/in/delms/

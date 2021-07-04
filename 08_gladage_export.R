@@ -293,7 +293,7 @@ gladage_export_processing <- function(selected_imports,param) {
     #Short dated Kg rec since 1/4/19 (<=2 days)
     since_0104 <- dispatch_dat_sample %>%
         mutate(
-            since_0104_flag = case_when( difftime(strptime("01.04.2020", format = "%d.%m.%Y") , `Dispatch_Date` , units="days")<=0 ~ TRUE ),
+            since_0104_flag = case_when( difftime(strptime("01.04.2021", format = "%d.%m.%Y") , `Dispatch_Date` , units="days")<=0 ~ TRUE ),
             short_dated_flag = case_when( difftime(`Expiry` , `Dispatch_Date` , units="days")<=2 ~ TRUE ),
             excl_fruitveg_flag = case_when( Department!="Fruit" & Department!="Vegetables" ~ TRUE, TRUE ~ NA )
         ) %>%
@@ -536,14 +536,14 @@ gladage_export_processing <- function(selected_imports,param) {
     #create conditional formatting in wb
     conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("max_invoice"), rule="=AND(D1>1,E1>1,VALUE(E1)-VALUE(D1)>0)", style = p_warn)
     conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("Last_Spot_Check_Date"), rule="=AND(VALUE(R1)>0,VALUE(P1)<DATE(YEAR(TODAY()),MONTH(TODAY())-11,1))", style = p_warn)
-    conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("kg_recd_since_0104"), rule="=OR(O1>((((TODAY()-DATE(2020,4,1))/365)*L1)*1.25),O1<((((TODAY()-DATE(2020,4,1))/365)*L1)*0.75))", style = p_warn)
+    conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("kg_recd_since_0104"), rule="=OR(O1>((((TODAY()-DATE(2021,4,1))/365)*L1)*1.25),O1<((((TODAY()-DATE(2021,4,1))/365)*L1)*0.75))", style = p_warn)
     conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("sage_number"), rule="=ISBLANK(B1)", style = p_warn)
     conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("# alloc. per year"), rule="=AND(J1=\"\",ROW(J1)<=COUNTA(A:A))", style = p_warn)
     # conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("avg_kg_recd"), rule="=OR(VALUE(S1)>(VALUE(L1)*1.25),VALUE(S1)<(VALUE(L1)*0.75))", style = p_warn)
     # conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("inv_os_between_30_60_days"), rule="=VALUE(I1)>0", style = p_warn)
     
     conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("max_Dispatch_Date"), rule="=AND(D1>1,E1>1,VALUE(D1)-VALUE(E1)>60)", style = p_alarm)
-    conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("kg_recd_since_0104"), rule="=OR(O1>((((TODAY()-DATE(2020,4,1))/365)*L1)*1.4),O1<((((TODAY()-DATE(2020,4,1))/365)*L1)*0.6))", style = p_alarm)
+    conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("kg_recd_since_0104"), rule="=OR(O1>((((TODAY()-DATE(2021,4,1))/365)*L1)*1.4),O1<((((TODAY()-DATE(2021,4,1))/365)*L1)*0.6))", style = p_alarm)
     # conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("avg_kg_recd"), rule="=OR(VALUE(S1)>(VALUE(L1)*1.5),VALUE(S1)<(VALUE(L1)*0.5))", style = p_alarm)
     conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("inv_os_morethan_30_days"), rule="=VALUE(I1)>0", style = p_warn)
     conditionalFormatting(wb, 1, rows=1:nrow(my_df_final), cols=which_col("max_invoice"), rule="=AND(D1>1,E1>1,VALUE(E1)-VALUE(D1)>60)", style = p_alarm)

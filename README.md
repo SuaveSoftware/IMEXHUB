@@ -45,7 +45,12 @@ We're excited that the first iteration of IMEXHUB is already helping two organis
 - SEO analysis for feature list and homepage optimisation
 
 
-## GETTING STARTED (LOCAL IMPLEMENTATION)
+## GETTING STARTED FOR DEVELOPERS
+<details>
+<summary>
+    LOCAL AND SERVER IMPLEMENTATIONS (coming soon)
+</summary>
+### LOCAL IMPLEMENTATION
 #### R and RStudio setup
 ```
 install.packages(c("shiny", "shinyWidgets", "shinythemes", "shinyFiles", "shinyjs", "config", "tidyverse", "lubridate", "readxl", "openxlsx", "DT", "mongolite", "jsonlite", "RSQLite", "cachem"))
@@ -74,7 +79,7 @@ local:
 
 ## GETTING STARTED (SERVER IMPLEMENTATION)
 [14/5 more coming soon]
-
+</details>
 
 ## GET IN TOUCH
 Email us at david@statementreader.com or connect here: https://www.linkedin.com/in/delms/

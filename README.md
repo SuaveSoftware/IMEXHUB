@@ -27,8 +27,8 @@ We're excited that the first iteration of IMEXHUB is already helping two organis
     - USER STAYS IN CONTROL - See the transactions in Excel before uploading to Quickbooks
     - FREE - Completely:) The closest comparison product costs £hundreds each year to process more than 100 transactions per month
 
-![Alt text](Screenshot.png?raw=true "IMEXHUB Screenshot")
-<div style="text-align: right"><em>Screenshot of main interface</em></div>
+![Alt text](Screenshot.png?raw=true "IMEXHUB: Screenshot of main interface")
+<em>Screenshot of main interface</em>
 
 ## WHAT'S NEXT?
 - Documentation for developers to contribute and for clients to implement the application

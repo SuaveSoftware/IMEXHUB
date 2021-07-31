@@ -27,12 +27,21 @@ We're excited that the first iteration of IMEXHUB is already helping two organis
     - USER STAYS IN CONTROL - See the transactions in Excel before uploading to Quickbooks
     - FREE - Completely:) The closest comparison product costs £hundreds each year to process more than 100 transactions per month
 
-![Alt text](Screenshot.png?raw=true "IMEXHUB Screenshot")
+![Alt text](Screenshot.png?raw=true "IMEXHUB: Screenshot of main interface")
+<em>Screenshot of main interface</em>
 
 
 ## WHAT'S NEXT?
-- Documentation for developers to contribute and for clients to implement the application
-- Cards, for separate input and export configurations
+PRIORITY TASKS:
+
+- Documentation for developers to contribute and for clients to implement the application: This readme document needs to cover all technical requirements and instructions for new developers and clients.
+
+- Cards, for separate input and export configurations: The main interface currently has a single import and export section (a ‘card’); this needs to be modularised for the user to set up multiple cards. For example an import type could be ‘Dropbox’, then the user can refresh the import to see the files and click export.
+
+- Add Renderui to reset fileInput on import file: this will allow multiple files to be uploaded with the progress bar showing correctly each time.
+
+OTHER TASKS:
+
 - Sessions, for concurrent users
 - Email (input)
 - PDF QR code (input)
@@ -40,7 +49,6 @@ We're excited that the first iteration of IMEXHUB is already helping two organis
 - PDF text parser (input)
 - Schedule imports
 - Schedule exports
-- Renderui to reset fileInput on import file
 - Document history log
 - User settings window
 - Display whether import is already exported in overview table
@@ -65,18 +73,22 @@ default:
     port: ""
     username: ""
     password: ""
+    drop_key: ""
+    drop_secret: ""
 
 local:
     host: "127.0.0.1"
     port: "27017"
     username: ""
     password: ""
+    drop_key: ""
+    drop_secret: ""
 ```
-[15/5 more coming soon]
+[more coming soon]
 
 
 ### SERVER IMPLEMENTATION
-[14/5 more coming soon]
+[more coming soon]
 
 
 ## GET IN TOUCH

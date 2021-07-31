@@ -12,6 +12,7 @@ library(lubridate)
 library(readxl)
 library(openxlsx)  #for write
 library(DT)
+library(rdrop2)  #https://github.com/karthik/rdrop2
 
 library(mongolite) # Resource: https://jeroen.github.io/mongolite/
 library(jsonlite)
@@ -40,6 +41,62 @@ sendnotification <- function(msg,duration,id,session) {
                                          session = session)
     addClass(id = str_c("shiny-notification-",id), class = "customclass2")
 }
+process_files <- function(file_selected,session) {
+    #pre open file checks, rule 1: is file already in imexhub_collection?
+    new_file_check_output <- file_selected %>% rowwise() %>% mutate( "new_file_check_output" = new_file_check(name,size) )
+    skipped_files <- new_file_check_output[,1][new_file_check_output[,5]==FALSE] %>% matrix(ncol = 1)
+    new_files_mat <- new_file_check_output[,1][new_file_check_output[,5]==TRUE] %>% matrix(ncol = 1)  #returns new files
+    notification_id <<- sendnotification(msg = str_c("new_file_check_output:",new_files_mat, " skipped_files:",skipped_files,collapse = TRUE),
+                                         duration = 2,id = "my_notification1",session = session)
+    addClass(id = "shiny-notification-panel", class = "customclass1")  #need to run once
+    req(new_files_mat %>% nrow() >0)  #only need to proceed with new files
+    file_selected <- new_file_check_output[new_file_check_output$new_file_check_output==TRUE,]
+    
+    #fill for archive check, has file been exported before?!!!
+    new_files_exported_mat <- data.frame(row.names = NULL,file_selected,new_files_exported_mat=1)
+    
+    #first line export_type identification
+    new_files_exported_importgroup_mat <- new_files_exported_mat %>% rowwise() %>% mutate( "new_files_exported_importgroup_mat" = get_group(datapath,name) )
+    notification_id <<- sendnotification(msg = str_c("import_group_output:",new_files_exported_importgroup_mat[,"new_files_exported_importgroup_mat"] %>% paste(.,collapse = ',')),
+                                         duration = 2,id = "my_notification3",session = session)
+    req(sum(new_files_exported_importgroup_mat[,"new_files_exported_importgroup_mat"]=="") ==0)  #no null import_groups
+    new_files_exported_importgroup_mat <- new_files_exported_importgroup_mat[new_files_exported_importgroup_mat$new_files_exported_importgroup_mat != "",]  #remove missing import_groups
+    
+    #parameters for all imports
+    import_datetime <- Sys.time()
+    
+    1:nrow(new_files_exported_importgroup_mat) %>% map(function(x) {
+        addClass(id = "shiny-notification-panel", class = "customclass1")  #need to run once (added here solves lost center container issue)
+        name <- new_files_exported_importgroup_mat[x,"name"] %>% unlist()
+        size <- new_files_exported_importgroup_mat[x,"size"] %>% unlist()
+        datapath <- new_files_exported_importgroup_mat[x,"datapath"] %>% unlist()
+        exported <- new_files_exported_importgroup_mat[x,"new_files_exported_mat"] %>% unlist()
+        import_group <- new_files_exported_importgroup_mat[x,"new_files_exported_importgroup_mat"] %>% unlist()
+        
+        #preprocessing
+        data <- data_preprocessed(datapath,import_group)  #list(data=data)
+        notification_id <<- sendnotification(msg = str_c("ran data_preprocessed: ",datapath," - ",import_group),
+                                             duration = 2,id = str_c("my_notification",3+x),session = session)
+        
+        #add to db (mydata,import_group,import_basename,import_size,import_mtime) +import_time
+        # import_mtime <- file.info(datapath)$mtime
+        my_import_id_list <- mongo_update_and_write(mydata = data,
+                                                    import_group = import_group,
+                                                    import_basename = name,
+                                                    import_size = size,
+                                                    import_mtime = '',
+                                                    import_datetime = import_datetime,
+                                                    exported = exported)
+        my_import_id <- my_import_id_list$import_id
+        notification_id <<- sendnotification(msg = str_c("ran mongo_update_and_write: ",my_import_id," - ",import_group),
+                                             duration = 2,id = str_c("my_notification",4+x),session = session)
+        
+        #add all data to new sqlite file
+        sqlite_update_and_write(my_import_id,data)
+        notification_id <<- sendnotification(msg = str_c("ran sqlite_update_and_write: ",my_import_id),
+                                             duration = 5,id = str_c("my_notification",6+x),session = session)
+    })
+}
 
 ui <- fluidPage(
     useShinyjs(),
@@ -52,7 +109,6 @@ ui <- fluidPage(
     inlineCSS(list(.customclass1 = "top: 0 !important; left: calc(50% - 250px) !important; width: 500px !important;")),
     inlineCSS(list(.customclass2 = "background-color: rgba(241, 160, 85, 0.53) !important;")),
     tags$style(".btn-file {width: 180px; text-align: left;cursor: pointer;}"),
-    tags$style("#GetDropbox {cursor: default;pointer-events: none;}"),
     tags$style("#GetPayPal {cursor: default;pointer-events: none;}"),
     tags$style("#button4 {cursor: default;pointer-events: none;}"),
     tags$style(".shiny-input-container {margin-left: 4px;margin-bottom: 0px;}"),
@@ -130,71 +186,68 @@ server <- function(input, output, session) {
 
     #LOCAL FILE INPUT
     observe({
-
         if (!is.null(input$GetFileInput)) {
-            file_selected <- input$GetFileInput  #%>% parseFilePaths(volumes,.)  #data.frame
+            file_selected <- input$GetFileInput
             reactive_values$file_path <- file_selected$datapath  #$name,size,type,datapath
             req(reactive_values$file_path %>% length() >0)
-
-            #pre open file checks, rule 1: is file already in imexhub_collection?
-            new_file_check_output <- file_selected %>% rowwise() %>% mutate( "new_file_check_output" = new_file_check(name,size) )
-            skipped_files <- new_file_check_output[,1][new_file_check_output[,5]==FALSE] %>% matrix(ncol = 1)
-            new_files_mat <- new_file_check_output[,1][new_file_check_output[,5]==TRUE] %>% matrix(ncol = 1)  #returns new files
-            notification_id <<- sendnotification(msg = str_c("new_file_check_output:",new_files_mat, " skipped_files:",skipped_files,collapse = TRUE),
-                                                 duration = 2,id = "my_notification1",session = session)
-            addClass(id = "shiny-notification-panel", class = "customclass1")  #need to run once
-            req(new_files_mat %>% nrow() >0)  #only need to proceed with new files
-            file_selected <- new_file_check_output[new_file_check_output$new_file_check_output==TRUE,]
             
-            #fill for archive check, has file been exported before?!!!
-            new_files_exported_mat <- data.frame(row.names = NULL,file_selected,new_files_exported_mat=1)
-
-            #first line export_type identification
-            new_files_exported_importgroup_mat <- new_files_exported_mat %>% rowwise() %>% mutate( "new_files_exported_importgroup_mat" = get_group(datapath,name) )
-            notification_id <<- sendnotification(msg = str_c("import_group_output:",new_files_exported_importgroup_mat[,"new_files_exported_importgroup_mat"] %>% paste(.,collapse = ',')),
-                                                 duration = 2,id = "my_notification3",session = session)
-            req(sum(new_files_exported_importgroup_mat[,"new_files_exported_importgroup_mat"]=="") ==0)  #no null import_groups
-            new_files_exported_importgroup_mat <- new_files_exported_importgroup_mat[new_files_exported_importgroup_mat$new_files_exported_importgroup_mat != "",]  #remove missing import_groups
-
-            #parameters for all imports
-            import_datetime <- Sys.time()
-
-            1:nrow(new_files_exported_importgroup_mat) %>% map(function(x) {
-                addClass(id = "shiny-notification-panel", class = "customclass1")  #need to run once (added here solves lost center container issue)
-                name <- new_files_exported_importgroup_mat[x,"name"] %>% unlist()
-                size <- new_files_exported_importgroup_mat[x,"size"] %>% unlist()
-                datapath <- new_files_exported_importgroup_mat[x,"datapath"] %>% unlist()
-                exported <- new_files_exported_importgroup_mat[x,"new_files_exported_mat"] %>% unlist()
-                import_group <- new_files_exported_importgroup_mat[x,"new_files_exported_importgroup_mat"] %>% unlist()
-
-                #preprocessing
-                data <- data_preprocessed(datapath,import_group)  #list(data=data)
-                notification_id <<- sendnotification(msg = str_c("ran data_preprocessed: ",datapath," - ",import_group),
-                                                     duration = 2,id = str_c("my_notification",3+x),session = session)
-
-                #add to db (mydata,import_group,import_basename,import_size,import_mtime) +import_time
-                # import_mtime <- file.info(datapath)$mtime
-                my_import_id_list <- mongo_update_and_write(mydata = data,
-                                                            import_group = import_group,
-                                                            import_basename = name,
-                                                            import_size = size,
-                                                            import_mtime = '',
-                                                            import_datetime = import_datetime,
-                                                            exported = exported)
-                my_import_id <- my_import_id_list$import_id
-                notification_id <<- sendnotification(msg = str_c("ran mongo_update_and_write: ",my_import_id," - ",import_group),
-                                                     duration = 2,id = str_c("my_notification",4+x),session = session)
-
-                #add all data to new sqlite file
-                sqlite_update_and_write(my_import_id,data)
-                notification_id <<- sendnotification(msg = str_c("ran sqlite_update_and_write: ",my_import_id),
-                                                     duration = 5,id = str_c("my_notification",6+x),session = session)
-            })
+            process_files(file_selected,session)
 
             #update ui
             mongo_read_ui_data()
             reactive_values$ui_data <- ui_data
         }
+    })
+
+    #DROPBOX FOLDER INPUT
+    observeEvent(input$GetDropbox,{
+        print("running input$GetDropbox")
+
+        token <<- ""
+        if (!file.exists("drop_token.rds")) {
+            print("no token")
+
+            token <<- drop_auth(key = config$drop_key,secret = config$drop_secret,new_user = TRUE,cache = FALSE)
+            saveRDS(token, file = "drop_token.rds")
+        } else {
+            token <<- readRDS("drop_token.rds")
+        }
+
+        #check token
+        if (token %>% length() == 1) {
+            print("no token")
+
+            file.remove("drop_token.rds")
+            return()
+        }
+
+        #all ok, proceed
+        dir_files <- drop_dir(recursive = TRUE,dtoken = token)  #".tag" "name" "path_lower" "path_display" "id" "client_modified" "server_modified" "rev" "size" "content_hash"
+        req(dir_files %>% nrow() >0)
+
+        #empty server /dropbox_downloads_temp
+        f <- list.files("dropbox_downloads_temp", include.dirs = F, full.names = T, recursive = T)
+        file.remove(f)
+
+        #download files from dropbox to /dropbox_downloads_temp (do after file_archive_check!!!)
+        dir_files %>%
+            split(x = .,f = dir_files$path_display) %>%
+            map(function(x) {drop_download(dtoken = token, path = x$path_display,overwrite = TRUE,local_path = "dropbox_downloads_temp")})
+
+        #construct data.frame
+        file_selected <- data.frame(row.names = NULL,
+                                    name = dir_files$name,
+                                    size = dir_files$size,
+                                    type = '',
+                                    datapath = str_c("dropbox_downloads_temp",dir_files$path_display)
+        )
+
+        process_files(file_selected,session)
+
+        #update ui
+        mongo_read_ui_data()
+        reactive_values$ui_data <- ui_data
+
     })
 
     

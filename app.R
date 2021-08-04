@@ -128,12 +128,9 @@ ui <- fluidPage(
         #2.1 Application Title
         title = div(
             tags$img(
-                src = "https://www.business-science.io/img/business-science-logo.png",
-                width = "30",
-                height = "30",
-                style = "webkit-filter: drop-shadow(3px 3px 3px #222)"
-            ),
-            "IMEXHUB"
+                src = "https://imexhub.s3.eu-west-1.amazonaws.com/IMEXHUB+LOGO.png",
+                height = "35"
+            )
         ),
         collapsible = FALSE,
         theme = shinytheme(theme)

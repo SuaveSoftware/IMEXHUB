@@ -66,7 +66,7 @@ install.packages(c("shiny", "shinyWidgets", "shinythemes", "shinyFiles", "shinyj
 Create a collection called "imexhub_collection", and a database called "imexhub_database"
 
 #### Application setup
-Create config.yaml:
+Create config.yaml. For dropbox key/secret, create app here: https://www.dropbox.com/developers/apps
 ```
 default:
     host: ""

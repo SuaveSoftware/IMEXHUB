@@ -77,7 +77,7 @@ gladage_export_processing <- function(selected_imports,param) {
         MEMBER = tibble(MEMBER)
     )
     #MASTER <- readRDS(file = "../MASTER.rds")
-    write_rds(MASTER,"../MASTER.rds")
+    # write_rds(MASTER,"../MASTER.rds")
 
     
     #GET DATA
@@ -589,5 +589,5 @@ gladage_export_processing <- function(selected_imports,param) {
     
     #write.csv(CSTLIST, "export_temp/MASTER.csv", row.names = FALSE)
     saveWorkbook(wb, "export_temp/temp.xlsx", overwrite = TRUE)
-    list(filepath="export_temp/temp.xlsx")
+    c("export_temp/temp.xlsx")
 }

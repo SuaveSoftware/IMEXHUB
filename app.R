@@ -324,13 +324,14 @@ server <- function(input, output, session) {
     })
     output$export_button <- downloadHandler(
         filename = function() {
-            paste("my_download", ".xlsx", sep = "")
+            paste0("my_download", ".zip")
         },
         content = function(file) {
             selected_imports <- reactive_values$ui_data
-            my_output <- run_export_processing(selected_imports=selected_imports,export_mode="FILE")
-            file.copy(my_output$filepath,file,overwrite = TRUE)
-            #file.remove(my_output$filepath)  #dev
+            my_output <- run_export_processing(selected_imports=selected_imports,export_mode="FILE")  #c(file1,file2,..)
+            zip(file,my_output)
+            #file.copy(my_output,file,overwrite = TRUE)  #single files only
+            #file.remove(my_output)  #dev
 
             notification_id <<- sendnotification(msg = str_c("saveWorkbook!!! ",file),
                                                  duration = 5,id = "my_notification15",session = session)

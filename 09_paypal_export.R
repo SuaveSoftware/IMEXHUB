@@ -31,6 +31,8 @@ paypal_export_processing_file <- function(selected_imports,param) {
             sqlite_read_data(x$import_id)
         )
     })
+    # write_rds(PAYPALCSV,"../MASTER.rds")
+    # PAYPALCSV <- read_rds(file = "../MASTER.rds")
 
     #rename/select
     paypal_dat <- PAYPALCSV %>%
@@ -181,24 +183,28 @@ paypal_export_processing_file <- function(selected_imports,param) {
     #     mutate(Date = Date %>% as.character(format="%d-%m-%y"),
     #            DueDate = DueDate %>% as.character(format="%d-%m-%y")) %>%
     #     write.csv(.,str_c("../dev/","QBexpenses_paypal",".csv"), row.names = FALSE)
+    files <- c()  #filenames for zip
     QBexpenses %>% mutate(LineAmount = (as.numeric(LineAmount)*-1) %>% as.character()) %>% rbind(QBexpenses_paypal) %>% 
         mutate(Date = Date %>% as.character(format="%d-%m-%y"),
                DueDate = DueDate %>% as.character(format="%d-%m-%y")) %>%
         write.csv(.,str_c("export_temp/","QBexpenses_QBexpenses_paypal",".csv"), row.names = FALSE)
+    files <- c(files,str_c("export_temp/","QBexpenses_QBexpenses_paypal",".csv"))
     QBsalesreceipts %>% 
         mutate(Date = Date %>% as.character(format="%d-%m-%y"),
                ServiceDate = ServiceDate %>% as.character(format="%d-%m-%y")) %>%
         write.csv(.,str_c("export_temp/","QBsalesreceipts",".csv"), row.names = FALSE)
+    files <- c(files,str_c("export_temp/","QBsalesreceipts",".csv"))
     seq_along(bank_by_currency_lst) %>% map(function(x) {
         bank_by_currency_lst[[x]] %>% 
             select(-Currency) %>% 
             mutate(Date = Date %>% as.character(format="%d-%m-%y")) %>%
             write.csv(., str_c("export_temp/",currencies[x,],".csv"), row.names = FALSE)
     })
-    
+    seq_along(bank_by_currency_lst) %>% map(function(x) {
+        files <<- c(files,str_c("export_temp/",currencies[x,],".csv"))    
+    })
     #check missing customers??? Set up new customers with addresses
     
-    #return output path
-    list(filepath="export_temp/QBexpenses_QBexpenses_paypal.csv")  #zip all csv files???
+    files
 }
 

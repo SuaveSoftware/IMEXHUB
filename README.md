@@ -55,40 +55,20 @@ OTHER TASKS:
 - SEO analysis for feature list and homepage optimisation
 
 
-## GETTING STARTED FOR DEVELOPERS
-### LOCAL IMPLEMENTATION
-#### R and RStudio setup
+## GETTING STARTED
+### CLIENTS
+[standalone app coming soon]
+
+
+### DEVELOPERS
+IMEXHUB is a lightweight data manipulation tool; here's some notes to get you started with learning from/contributing to the code:
+- Install R and RStudio
+- No external database is required, a local json file is used for simplicity
+- config.yaml currently provides Dropbox credentials only, a copy of .config.yaml is still needed
+- The following libraries are required:
 ```
 install.packages(c("shiny", "shinyWidgets", "shinythemes", "shinyFiles", "shinyjs", "config", "tidyverse", "lubridate", "readxl", "openxlsx", "DT", "mongolite", "jsonlite", "RSQLite", "cachem"))
 ```
-
-#### MongoDB setup
-Create a collection called "imexhub_collection", and a database called "imexhub_database"
-
-#### Application setup
-Create config.yaml. For dropbox key/secret, create app here: https://www.dropbox.com/developers/apps
-```
-default:
-    host: ""
-    port: ""
-    username: ""
-    password: ""
-    drop_key: ""
-    drop_secret: ""
-
-local:
-    host: "127.0.0.1"
-    port: "27017"
-    username: ""
-    password: ""
-    drop_key: ""
-    drop_secret: ""
-```
-[more coming soon]
-
-
-### SERVER IMPLEMENTATION
-[more coming soon]
 
 
 ## GET IN TOUCH

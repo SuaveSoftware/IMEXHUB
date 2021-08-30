@@ -1,12 +1,17 @@
 #pre-open file checks [generic] ----
 #rule#1: new name,size,mtime
 new_file_check <- function(name,size) {
-    mongo_connection <- mongo_connect(collection = "imexhub_collection", database = "imexhub_database")
-    
-    query <- str_c('{ "import_basename" : "',name,'" , "import_size" : ',size,' }')
-    test <- mongo_connection$distinct( key = "import_id" , query = query ) %>% length()==0  #pass
-    
-    mongo_connection$disconnect()
+    imexhub_data <- json_read()
+    if (!imexhub_data %>% nrow() >0) return(TRUE)
+        
+    name_text <- name %>% as.character()
+    size_text <- size %>% as.character()
+    test <- imexhub_data %>% dplyr::filter(
+        import_basename==name_text &
+        import_size==size_text
+        ) %>%
+        nrow()==0  #pass
+
     test  #true/false
 }
 

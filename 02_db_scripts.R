@@ -1,102 +1,75 @@
-mongo_connect <- function(collection, database,
-             host = config$host,
-             port = config$port,
-             username = config$username,
-             password = config$password) {
-    
-    if (port != "" && username != "") {  #development
-        mongo(
-            collection = collection, db = database,
-            url = str_glue("mongodb://{username}:{password}@{host}:{port}")
-        )
-    } else if (port != "") {  #local
-        mongo(
-            collection = collection,
-            url = str_glue("mongodb://{host}:{port}/{database}")
-        )
+json_read <- function() {
+    if (file.exists("imexhub_database.rds")) {
+        json <- read_rds(file = "imexhub_database.rds")
+        json %>% fromJSON(simplifyDataFrame = TRUE) %>% bind_rows()
     } else {
-        mongo(
-            collection = collection,
-            url = str_glue("mongodb+srv://{username}:{password}@{host}/{database}")
-        )
+        temp <- c() %>% toJSON()
+        write_rds(x = temp,file = "imexhub_database.rds")
+        tibble()
     }
 }
-sqlite_connect <- function(db_name) {
-    dbConnect(RSQLite::SQLite(), db_name)
+json_write <- function(obj) {
+    write_rds(x = obj %>% toJSON(),file = "imexhub_database.rds")
 }
+json_read_ui_data <- function() {
+    imexhub_data <- json_read()
 
-mongo_read_ui_data <- function() {
-    mongo_connection <- mongo_connect(collection = "imexhub_collection", database = "imexhub_database")
-    
-    it <- mongo_connection$iterate(query = str_c('{}'))
-    mydata <<- list()  #list(import_type=tibble)
-    while (!is.null(x <- it$one())) {
-        list_temp <- list(
-            import_id = x$import_id,
-            import_type = x$import_type,
-            import_group = x$import_group,
-            import_basename = x$import_basename,
-            import_size = x$import_size,
-            import_mtime = x$import_mtime,
-            selected_ui = x$selected_ui,
-            import_datetime = x$import_datetime,
-            exported = x$exported
-            )
-        mydata <<- mydata %>% append(list(list_temp))
-    }
-    
     ui_data <<- list()
-    lapply(seq_along(mydata),function(n){
-        ui_data[[n]] <<- list(import_id=mydata[[n]]$import_id,
-                              import_type=mydata[[n]]$import_type,
-                              import_group=mydata[[n]]$import_group,
-                              import_basename=mydata[[n]]$import_basename,
-                              import_size=mydata[[n]]$import_size,
-                              import_mtime=mydata[[n]]$import_mtime,
-                              selected_ui=mydata[[n]]$selected_ui,
-                              import_datetime=mydata[[n]]$import_datetime,
-                              exported=mydata[[n]]$exported
-                              )  
-    })
+    if (imexhub_data %>% nrow() >0) {
+        ui_data <<- imexhub_data %>% 
+            select(import_id,import_type,import_group,import_basename,import_size,import_mtime,selected_ui,import_datetime,exported) %>%
+            group_split(.keep = TRUE,import_id) %>% map(.,function(x){x %>% as.list()})
+    }
 
-    mongo_connection$disconnect()
     ui_data
 }
-
-#data
-mongo_update_and_write <- function(mydata,import_group="NULL",import_basename="NULL",import_size="NULL",import_mtime="NULL",import_datetime="",exported=0) {
-    mongo_connection <- mongo_connect(collection = "imexhub_collection", database = "imexhub_database")
-
+json_update_and_write <- function(mydata,import_group="NULL",import_basename="NULL",import_size="NULL",import_mtime="NULL",import_datetime="",exported=0) {
     mydata$data <- mydata$data %>% cbind(list(selected_ui=1))  #ui loads with checkboxes selected, always exists
     myimport_type=strsplit(import_group,"\\|")[[1]][2]
-    #get max import_type import_id
-    max_import_type_tbl <-
-        mongo_connection$find(query = str_c('{ "import_type": "',myimport_type,'" }'),
-                              fields = '{"import_id":true}',
-                              limit = 1,
-                              sort = '{"import_id": -1}')
+
+    imexhub_data <- json_read()
+
+    #get max_import_type_id
+    if (imexhub_data %>% nrow() >0) {
+        max_import_type_tbl <- imexhub_data %>% filter("import_type" == myimport_type)
+        if (max_import_type_tbl %>% nrow() >0) max_import_type_id <- max_import_type_tbl %>% pull(import_id) %>% max() %>% str_extract(pattern = "\\d+") %>% as.numeric()
+    }
     max_import_type_id <- 0
-    if (max_import_type_tbl %>% nrow() >0) max_import_type_id <- max_import_type_tbl %>% pull(import_id) %>% str_extract(pattern = "\\d+") %>% as.numeric()
     max_import_type_id <- (max_import_type_id+1) %>% as.character() %>% str_pad(width = 2,side = c("left"),pad = "0")  #00 fill for 10+ ids
     my_import_id <- paste0(myimport_type,max_import_type_id)
-
-    tibble(
-        import_id=my_import_id,
-        export_type=strsplit(import_group,"\\|")[[1]][1],
-        import_type=myimport_type,
-        import_group=import_group,
-        import_basename=import_basename,
-        import_size=import_size,
-        import_mtime=import_mtime,
-        import_datetime=import_datetime,
-        selected_ui=1,
-        exported=exported
-    ) %>%
-        mongo_connection$insert()
-
-    mongo_connection$disconnect()
-
+    
+    #combine and write to json
+    imexhub_data <- imexhub_data %>% rbind(
+        data.frame(
+            import_id=my_import_id,
+            export_type=strsplit(import_group,"\\|")[[1]][1],
+            import_type=myimport_type,
+            import_group=import_group,
+            import_basename=import_basename,
+            import_size=import_size,
+            import_mtime=import_mtime,
+            import_datetime=import_datetime,
+            selected_ui=1,
+            exported=exported
+        ))
+        
+    json_write(imexhub_data)
+    
     list(import_id=my_import_id,export_type=strsplit(import_group,"\\|")[[1]][1],import_type=myimport_type)
+}
+json_delete <- function(import_id) {
+    imexhub_data <- json_read()
+
+    import_id_text <- import_id
+    imexhub_data <- imexhub_data %>% filter(import_id != import_id_text)
+    
+    json_write(imexhub_data)
+}
+
+
+#sqlite
+sqlite_connect <- function(db_name) {
+    dbConnect(RSQLite::SQLite(), db_name)
 }
 sqlite_update_and_write <- function(my_import_id,mydata) {
     my_db_name <- str_c("db_files/",my_import_id,".db")
@@ -106,19 +79,11 @@ sqlite_update_and_write <- function(my_import_id,mydata) {
 
     dbDisconnect(sqlite_connection)
 }
-
-mongo_delete <- function(import_id) {
-    mongo_connection <- mongo_connect(collection = "imexhub_collection", database = "imexhub_database")
-
-    mongo_connection$remove(query = str_c('{ "import_id":"',import_id,'" }'),just_one = TRUE)
-    mongo_connection$disconnect()
-}
 sqlite_delete <- function(my_import_id) {
     my_db_name <- str_c("db_files/",my_import_id,".db")
 
     file.remove(my_db_name)
 }
-
 sqlite_read_data <- function(my_import_id) {
     my_db_name <- str_c("db_files/",my_import_id,".db")
     sqlite_connection <- sqlite_connect(my_db_name)

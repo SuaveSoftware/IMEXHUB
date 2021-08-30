@@ -63,7 +63,7 @@ process_files <- function(file_selected,session) {
     new_files_exported_importgroup_mat <- new_files_exported_importgroup_mat[new_files_exported_importgroup_mat$new_files_exported_importgroup_mat != "",]  #remove missing import_groups
     
     #parameters for all imports
-    import_datetime <- Sys.time()
+    import_datetime <- Sys.time() %>% as_datetime(tz="") %>% as.character()
     
     1:nrow(new_files_exported_importgroup_mat) %>% map(function(x) {
         addClass(id = "shiny-notification-panel", class = "customclass1")  #need to run once (added here solves lost center container issue)
@@ -80,7 +80,7 @@ process_files <- function(file_selected,session) {
         
         #add to db (mydata,import_group,import_basename,import_size,import_mtime) +import_time
         # import_mtime <- file.info(datapath)$mtime
-        my_import_id_list <- mongo_update_and_write(mydata = data,
+        my_import_id_list <- json_update_and_write(mydata = data,
                                                     import_group = import_group,
                                                     import_basename = name,
                                                     import_size = size,
@@ -88,7 +88,7 @@ process_files <- function(file_selected,session) {
                                                     import_datetime = import_datetime,
                                                     exported = exported)
         my_import_id <- my_import_id_list$import_id
-        notification_id <<- sendnotification(msg = str_c("ran mongo_update_and_write: ",my_import_id," - ",import_group),
+        notification_id <<- sendnotification(msg = str_c("ran json_update_and_write: ",my_import_id," - ",import_group),
                                              duration = 2,id = str_c("my_notification",4+x),session = session)
         
         #add all data to new sqlite file
@@ -177,7 +177,7 @@ server <- function(input, output, session) {
     
     #SETUP
     reactive_values <- reactiveValues(ui_data = NULL, folder_ignore_already_exported = FALSE)
-    reactive_values$ui_data <- mongo_read_ui_data()
+    reactive_values$ui_data <- json_read_ui_data()
     notification_id <- NULL
 
 
@@ -191,7 +191,7 @@ server <- function(input, output, session) {
             process_files(file_selected,session)
 
             #update ui
-            mongo_read_ui_data()
+            json_read_ui_data()
             reactive_values$ui_data <- ui_data
         }
     })
@@ -242,7 +242,7 @@ server <- function(input, output, session) {
         process_files(file_selected,session)
 
         #update ui
-        mongo_read_ui_data()
+        json_read_ui_data()
         reactive_values$ui_data <- ui_data
 
     })
@@ -254,7 +254,7 @@ server <- function(input, output, session) {
         output$overview <- DT::renderDataTable({
             DT::datatable(
                 data = reactive_values$ui_data %>% lapply(function(x) {
-                    tibble(x$import_basename,x$import_type,x$import_datetime %>% format("%x %X"))  #x$import_id,
+                    tibble(x$import_basename,x$import_type,x$import_datetime)  #%>% format("%x %X")
                 }) %>% bind_rows() %>% setNames(c("File name","Import type","Import time")),
                 options=list(
                     searching=FALSE,
@@ -324,14 +324,19 @@ server <- function(input, output, session) {
     })
     output$export_button <- downloadHandler(
         filename = function() {
+            # paste0("my_download", ".xlsx")
             paste0("my_download", ".zip")
         },
         content = function(file) {
             selected_imports <- reactive_values$ui_data
             my_output <- run_export_processing(selected_imports=selected_imports,export_mode="FILE")  #c(file1,file2,..)
-            zip(file,my_output)
-            #file.copy(my_output,file,overwrite = TRUE)  #single files only
-            #file.remove(my_output)  #dev
+            
+            if (length(my_output) >1) {
+                zip(file,my_output)
+            } else {
+                file.copy(my_output,file,overwrite = TRUE)
+            }
+            #file.remove(my_output$filepath)  #dev
 
             notification_id <<- sendnotification(msg = str_c("saveWorkbook!!! ",file),
                                                  duration = 5,id = "my_notification15",session = session)
@@ -342,13 +347,13 @@ server <- function(input, output, session) {
     # delete imported files
     observeEvent(input$remove_imported_file,{
         unselected_imports <- reactive_values$ui_data
-        unselected_imports %>% map(function(x) {x$import_id} %>% mongo_delete(.))
+        unselected_imports %>% map(function(x) {x$import_id} %>% json_delete(.))
         unselected_imports %>% map(function(x) {x$import_id} %>% sqlite_delete(.))
         
         notification_id <<- sendnotification(msg = str_c("remove_imported_file:",unselected_imports %>% paste(.,collapse = '')),
                                              duration = 2,id = "my_notification21",session = session)
         addClass(id = "shiny-notification-panel", class = "customclass1")
-        mongo_read_ui_data()
+        json_read_ui_data()
         
         if (ui_data %>% length() ==0) {
             output[["overview"]] <- NULL  #NULL DT::datatable otherwise get error for data

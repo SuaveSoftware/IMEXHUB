@@ -333,7 +333,7 @@ server <- function(input, output, session) {
             my_output <- run_export_processing(selected_imports=selected_imports,export_mode="FILE")  #c(file1,file2,..)
             
             if (length(my_output) >1) {
-                zip(file,my_output)
+                zip::zip(file,my_output)
             } else {
                 file.copy(my_output,file,overwrite = TRUE)
             }

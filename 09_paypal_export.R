@@ -205,6 +205,6 @@ paypal_export_processing_file <- function(selected_imports,param) {
     })
     #check missing customers??? Set up new customers with addresses
     
-    files
+    files[1]
 }
 

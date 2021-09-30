@@ -325,8 +325,8 @@ server <- function(input, output, session) {
     })
     output$export_button <- downloadHandler(
         filename = function() {
-            paste0("my_download", ".xlsx")  #gladage
-            # paste0("my_download", ".zip")  #paypal
+            #paste0("my_download", ".xlsx")  #gladage
+            paste0("my_download", ".zip")  #paypal
         },
         content = function(file) {
             selected_imports <- reactive_values$ui_data

@@ -54,11 +54,11 @@ Download, install and run IMEXHUB.  For multi currency PayPal to QBO follow thes
 
 *CHECK THE CSV FILES: you can change the VAT rate and Item easily at this stage in Excel, then save your changes in a CSV format*
 
-6. Import the CSV files from IMEXHUB to the correct sections of QBO as follows (these files may change depending on the currencies you have transactions for):
-USD.csv -> Bank Data
-GBP.csv -> Bank Data
-EUR.csv -> Bank Data
-QBsalesreceipts.csv -> Sales Receipts
+6. Import the CSV files from IMEXHUB to the correct sections of QBO as follows (these files may change depending on the currencies you have transactions for):<br>
+USD.csv -> Bank Data<br>
+GBP.csv -> Bank Data<br>
+EUR.csv -> Bank Data<br>
+QBsalesreceipts.csv -> Sales Receipts<br>
 QBexpenses_QBexpenses_paypal.csv -> Bills
 <img src="img/Screenshot_step6.png" width="400" alt="'Import data' in QBO"/>
 

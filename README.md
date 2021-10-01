@@ -34,33 +34,33 @@ We're excited that the first iteration of IMEXHUB is already helping two organis
 
 
 ## GETTING STARTED
-### CLIENTS
+### FOR CLIENTS
 Here's the link to download the Windows installer: https://drive.google.com/file/d/1hPteMyU6Oni7YIvZy-OY_BORta6dVv5r/view?usp=sharing
 
 Download, install and run IMEXHUB.  For multi currency PayPal to QBO follow these steps:
 
-![Alt text](img/Screenshot_step1.png?raw=true "'All transactions' in PayPal")
 1. Locate the 'All transactions' view from PayPal
+<img src="img/Screenshot_step1.png" width="400" alt="All transactions in PayPal"/>
 
-![Alt text](img/Screenshot_step2.png?raw=true "'Download' button in PayPal")
 2. Click to enter the 'Download' section of PayPal
+<img src="img/Screenshot_step2.png" width="400" alt="'Download' button in PayPal"/>
 
-![Alt text](img/Screenshot_step3.png?raw=true "'Balance affecting' transactions report in PayPal")
 3. Create and download a report of 'balance affecting' transactions for the desired period, in a CSV format
+<img src="img/Screenshot_step3.png" width="400" alt="'Balance affecting' transactions report in PayPal"/>
 
 4. Import the downloaded CSV file to IMEXHUB
 
 5. Click to Export a zip file containing separate CSV files
 
-**CHECK THE CSV FILES: you can change the VAT rate and Item easily at this stage in Excel, then save your changes in a CSV format**
+*CHECK THE CSV FILES: you can change the VAT rate and Item easily at this stage in Excel, then save your changes in a CSV format*
 
-![Alt text](img/Screenshot_step6.png?raw=true "'Import data' in QBO")
 6. Import the CSV files from IMEXHUB to the correct sections of QBO as follows (these files may change depending on the currencies you have transactions for):
 USD.csv -> Bank Data
 GBP.csv -> Bank Data
 EUR.csv -> Bank Data
 QBsalesreceipts.csv -> Sales Receipts
 QBexpenses_QBexpenses_paypal.csv -> Bills
+<img src="img/Screenshot_step6.png" width="400" alt="'Import data' in QBO"/>
 
 7. Check and edit any transactions that need extra attention in QBO.  Report back any issues to help other users.
 
